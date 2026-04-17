@@ -1,0 +1,33 @@
+#
+# Flat-interface geometry for the grounding-line starter example.
+# Coordinates use the internal mesher convention with z increasing upward.
+#
+# number of interfaces
+#
+3
+#
+# interface number 1 (bottom of the mesh)
+#
+2
+-12000.0 0.0
+  6000.0 0.0
+#
+# interface number 2 (bottom of the ice layer)
+#
+2
+-12000.0 1200.0
+  6000.0 1200.0
+#
+# interface number 3 (free surface)
+#
+2
+-12000.0 1500.0
+  6000.0 1500.0
+#
+# number of spectral elements per layer in the vertical direction
+#
+# layer 1: substrate thickness = 1200 m -> dz = 30 m
+40
+#
+# layer 2: ice thickness = 300 m -> dz = 30 m
+10

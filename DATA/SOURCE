@@ -1,0 +1,38 @@
+## Grounding-line starter source
+#
+# Simple impulsive opening-mode source placed on the ice free surface on the left.
+# We approximate a tensile, non-double-couple fracture source using a diagonal
+# moment tensor with positive Mxx and Mzz and zero Mxz.
+#
+source_surf                     = .true.
+xs                              = -10000.d0
+# z is ignored because source_surf = .true.
+zs                              = 1380.d0
+
+## Source type parameters:
+#  1 = elastic force or acoustic pressure
+#  2 = moment tensor
+source_type                     = 2
+
+## Source time function
+time_function_type              = 1
+name_of_source_file             = UNUSED
+burst_band_width                = 0.
+f0                              = 10.0d0
+tshift                          = 0.0d0
+
+## Force source
+# Unused for source_type = 2.
+anglesource                     = 0.0d0
+
+## Moment tensor (opening-mode, non-double-couple)
+Mxx                             = 1.d0
+Mzz                             = 1.d0
+Mxz                             = 0.d0
+
+## Amplification
+factor                          = 2.d10
+
+## Moving source parameters
+vx                              = 0.0d0
+vz                              = 0.0d0
