@@ -5,7 +5,7 @@
 #-----------------------------------------------------------
 
 # title of job
-title                           = Grounding-line starter model: ice over water/rock
+title                           = Grounding-line starter model: ice over cavity water / supported substrate
 
 # forward or adjoint simulation
 SIMULATION_TYPE                 = 1
@@ -16,8 +16,8 @@ SAVE_FORWARD                    = .false.
 NPROC                           = 1
 
 # time step parameters
-NSTEP                           = 18000
-DT                              = 0.6d-3
+NSTEP                           = 27000
+DT                              = 0.4d-3
 
 # time stepping
 time_stepping_scheme            = 1
@@ -143,7 +143,7 @@ PERIODIC_HORIZ_DIST             = 4000.d0
 
 nbmodels                        = 3
 # Material 1: water (acoustic)
-# Material 2: rock (elastic)
+# Material 2: grounded/sub-cavity substrate (elastic)
 # Material 3: ice  (elastic)
 1 1 1000.d0 1500.d0    0.d0 0 0 9999 9999 0 0 0 0 0 0
 2 1 2700.d0 4000.d0 2300.d0 0 0 9999 9999 0 0 0 0 0 0
@@ -174,14 +174,17 @@ tangential_detection_curve_file = ./DATA/courbe_eros_nodes
 #
 #-----------------------------------------------------------
 
-# Flat interfaces are enough here because the grounding line is represented by
-# a vertical material split at x = 0 inside the lower layer.
+# Flat interfaces are enough here because the geometry is still piecewise
+# rectilinear: a full-width solid underlayer, a 100 m cavity water layer only
+# on the floating side, and a vertical grounding-line split at x = 0.
 interfacesfile                  = ./interfaces_groundingline.dat
 
 # Geometry summary:
 #   x in [-12000, 6000] m -> total width 18000 m
 #   z in [0, 1500] m      -> total depth 1500 m
 #   ice thickness         -> 300 m (from z = 1200 to 1500 m)
+#   cavity water thickness-> 100 m (from z = 1100 to 1200 m for x < 0)
+#   solid underlayer      -> z = 0 to 1100 m across the full width
 # The 50 m horizontal element size makes x = 0 coincide with an element edge.
 # The source is kept about 10 km left of the grounding line so the packet can
 # mature before hitting x = 0.
@@ -195,17 +198,20 @@ absorbtop                       = .false.
 absorbleft                      = .true.
 
 # Layer numbering from interfaces file:
-#   nz = 1..40 : substrate
-#   nz = 41..50: ice
+#   nz = 1..55 : full-width solid underlayer
+#   nz = 56..60: x < 0 water cavity, x > 0 grounded substrate
+#   nz = 61..75: ice layer
 #
 # Region split:
-#   x < 0  -> water below ice
-#   x > 0  -> rock below ice
+#   full x -> solid underlayer
+#   x < 0  -> 100 m water cavity below ice
+#   x > 0  -> grounded substrate continues to ice base
 #   full x -> ice layer
-nbregions                       = 3
-1  240  1 40 1
-241 360 1 40 2
-1  360 41 50 3
+nbregions                       = 4
+1  360  1 55 2
+1  240 56 60 1
+241 360 56 60 2
+1  360 61 75 3
 
 #-----------------------------------------------------------
 #

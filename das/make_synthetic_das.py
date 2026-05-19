@@ -24,11 +24,11 @@ def parse_args() -> argparse.Namespace:
         default="S",
         help="Receiver prefix to use, e.g. S for near-surface or B for buried",
     )
-    parser.add_argument("--gauge-length", type=float, default=50.0, help="Gauge length in meters")
+    parser.add_argument("--gauge-length", type=float, default=6.28, help="Gauge length in meters")
     parser.add_argument(
         "--channel-spacing",
         type=float,
-        default=25.0,
+        default=6.28,
         help="Target DAS channel spacing in meters",
     )
     parser.add_argument(

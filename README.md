@@ -1,94 +1,156 @@
-# Grounding-Line Starter Example
+# fw-reflections
 
-This example builds a 2D P-SV model for Rayleigh-like wave propagation in a uniform ice layer over two laterally joined half spaces:
+Grounding-line Rayleigh-wave reflection experiments built around a 2D
+SPECFEM2D model of:
 
-- ice for the full model width from `z = 1200 m` to `z = 1500 m`
-- water below the ice for `x < 0`
-- rock below the ice for `x > 0`
+- a full-width elastic ice layer
+- a floating cavity on the left
+- grounded substrate on the right
+- optional geometry and material sweeps for reflection analysis
 
-## Meshing choice
+This repo is intentionally lightweight. It keeps the model inputs, Python
+postprocessing, notebooks, and sweep drivers, but it does **not** keep the
+large generated simulation outputs.
 
-This example uses the **internal interface-based mesher**, not an external mesh workflow.
+## How this repo is meant to be used
 
-That is the cleanest route here because the geometry is still rectilinear:
+This project is designed to live inside a built SPECFEM2D checkout at:
 
-- the ice base is a flat horizontal interface
-- the grounding line is a vertical material split at `x = 0`
-- SPECFEM2D's internal region table can assign different materials to rectangular blocks in `(nx, nz)` index space
+```text
+SPECFEM2D_ROOT/WORK/groundingline
+```
 
-By choosing `xmin = -12000 m`, `xmax = 6000 m`, and `nx = 360`, the `x = 0` transition falls exactly on an element edge, which keeps the setup simple and robust while placing the source about 10 km to the left of the grounding line and giving transmitted energy a larger rock-side buffer before it reaches the right absorbing boundary.
+The helper scripts assume the SPECFEM2D executables are available at:
 
-## Key model parameters
+```text
+SPECFEM2D_ROOT/bin/xmeshfem2D
+SPECFEM2D_ROOT/bin/xspecfem2D
+```
 
-- Total width: `18000 m`
-- Total depth: `1500 m`
-- Ice thickness `H`: `300 m`
-- Grounding-line position: `x = 0`
-- Source: `x = -10000 m` on the free surface (`source_surf = .true.`)
-- Receiver span: `x = -3500 m` to `x = -200 m`
-- Receiver spacing: `50 m`
-- Dominant source frequency: `10 Hz`
-- Total simulation time: `10.8 s`
+So the recommended setup is:
 
-Material placeholders are defined near the middle of [`DATA/Par_file`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/Par_file):
+1. Build SPECFEM2D in a separate checkout.
+2. Clone this repo into `WORK/groundingline` inside that checkout.
 
-- Water: `rho = 1000 kg/m^3`, `Vp = 1500 m/s`
-- Rock: `rho = 2700 kg/m^3`, `Vp = 4000 m/s`, `Vs = 2300 m/s`
-- Ice: `rho = 917 kg/m^3`, `Vp = 3800 m/s`, `Vs = 1900 m/s`
+## Repository layout
 
-Receiver parameters live in [`DATA/make_stations.py`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/make_stations.py), so you can quickly tighten spacing later for DAS-style channel studies.
+- [`DATA/Par_file`](DATA/Par_file): baseline model, mesh, and material setup
+- [`DATA/SOURCE`](DATA/SOURCE): baseline shallow shear-couple source
+- [`DATA/interfaces_groundingline.dat`](DATA/interfaces_groundingline.dat): interface geometry
+- [`DATA/make_stations.py`](DATA/make_stations.py): receiver-array generator
+- [`run_this_example.sh`](run_this_example.sh): baseline forward-model runner
+- [`das/`](das): synthetic DAS utilities and notebooks
+- [`sweep/`](sweep): parameter-sweep drivers and comparison notebooks
 
-## Files
+## Baseline model
 
-- [`DATA/Par_file`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/Par_file): main simulation and mesh setup
-- [`DATA/SOURCE`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/SOURCE): impulsive opening-mode moment tensor source on the ice free surface
-- [`DATA/interfaces_groundingline.dat`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/interfaces_groundingline.dat): flat interfaces for bottom, ice base, and free surface
-- [`DATA/make_stations.py`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/make_stations.py): receiver-array generator
-- [`DATA/STATIONS`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/DATA/STATIONS): generated receiver list
-- [`run_this_example.sh`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/run_this_example.sh): convenience runner
+The baseline geometry is:
 
-## How to run
+- ice from `z = 1200 m` to `z = 1500 m`
+- a `100 m` water cavity for `x < 0`, from `z = 1100 m` to `z = 1200 m`
+- a solid underlayer from `z = 0 m` to `z = 1100 m`
+- grounded substrate reaching the ice base directly for `x > 0`
 
-From `/Users/bradlipovsky/specfem2d-master`:
+Key baseline values:
+
+- total width: `18000 m`
+- total depth: `1500 m`
+- ice thickness: `300 m`
+- grounding line: `x = 0`
+- source: shallow `Mxz` shear couple, `10 m` below the free surface
+- source frequency: `10 Hz`
+- default receiver span: `x = -2000 m` to `x = +2000 m`
+- default receiver spacing: `6.28 m`
+- total simulation time: `10.8 s`
+
+Material placeholders in [`DATA/Par_file`](DATA/Par_file):
+
+- water: `rho = 1000 kg/m^3`, `Vp = 1500 m/s`
+- substrate: `rho = 2700 kg/m^3`, `Vp = 4000 m/s`, `Vs = 2300 m/s`
+- ice: `rho = 917 kg/m^3`, `Vp = 3800 m/s`, `Vs = 1900 m/s`
+
+## Python environment
+
+The notebooks and helper scripts use a small Python stack:
+
+- `numpy`
+- `matplotlib`
+- `jupyter`
+
+Install them with:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+## Running the baseline simulation
+
+From the SPECFEM2D root:
 
 ```bash
 cd WORK/groundingline
 python3 DATA/make_stations.py
-chmod +x run_this_example.sh
 ./run_this_example.sh
 ```
 
-Or run the executables manually after generating `DATA/STATIONS`:
+That writes generated products into `OUTPUT_FILES/`, which is ignored by git.
+
+## Running the DAS notebooks
+
+After the baseline simulation:
 
 ```bash
-cd /Users/bradlipovsky/specfem2d-master/WORK/groundingline
-python3 DATA/make_stations.py
-./bin/xmeshfem2D
-./bin/xspecfem2D
+cd WORK/groundingline/das
+python3 make_synthetic_das.py \
+  --input ../OUTPUT_FILES \
+  --station-prefix S \
+  --gauge-length 6.28 \
+  --channel-spacing 6.28 \
+  --output products/surface_das.npz
 ```
 
-## What to expect
+Then open:
 
-Qualitatively, you should see:
+- [`das/groundingline_das_workflow.ipynb`](das/groundingline_das_workflow.ipynb)
+- [`das/groundingline_reflection_coefficient.ipynb`](das/groundingline_reflection_coefficient.ipynb)
 
-- a strong Rayleigh-like wave packet traveling rightward along the ice free surface
-- transmitted energy continuing across the `x = 0` transition
-- a reflected surface-guided phase returning into the left-side ice
-- mode conversion and body-wave energy radiated into the ice and substrate near the grounding line
+## Running the sweep notebooks
 
-## Sanity checks
+The sweep notebooks expect their corresponding compact result directories to
+exist. Those directories are regenerated by the scripts in [`sweep/`](sweep).
 
-- Confirm the mesh snapshot shows a flat 300 m ice layer over a left-water/right-rock substrate.
-- Check that the source plots inside the ice, not on the free surface.
-- Verify the early direct surface-wave train moves rightward first.
-- Look for the reflected Rayleigh-like arrival on the left-side stations after the direct arrival and before any obvious left-boundary contamination.
+Examples:
 
-With the current geometry, a good first place to inspect reflected energy is the left receiver line around `x = -2500 m` to `x = -1000 m`.
+```bash
+cd WORK/groundingline/sweep
+python3 run_grounded_material_sweep.py --frequency-hz 10
+python3 run_supported_cavity_sweep.py
+python3 run_ice_thickness_sweep.py
+python3 run_groundingline_position_sweep.py
+python3 run_groundingline_position_large_sweep.py
+python3 run_sloping_seafloor_comparison.py
+```
 
-## Limitations
+Then open the corresponding notebooks in [`sweep/`](sweep).
 
-- This version is intentionally elongated so the grounding line sees a more mature incoming packet before scattering.
-- This is still a starter model with flat interfaces and simple isotropic properties.
-- The source is a simple opening-mode moment tensor approximation, not a full fracture-dynamics model.
-- The `50 m` station spacing is intentionally coarse for a first pass; DAS-style work will likely need denser spacing later.
-- PMLs help, but if you extend the simulation time much further you may still want a wider left-side buffer before measuring small reflection coefficients.
+## What is intentionally not tracked
+
+This repo excludes:
+
+- `OUTPUT_FILES/`
+- compact sweep gathers such as `surface_gather.npz`
+- temporary DAS products
+- local binaries and symlinks in `bin/`
+- debug mesh artifacts and caches
+
+That keeps the repository small while preserving everything needed to recreate
+the results.
+
+## Notes
+
+- The current baseline uses Stacey absorbing boundaries because earlier PML
+  runs developed late-time instability in this fluid-solid geometry.
+- The sweep notebooks are intended to be rerun after generating fresh compact
+  outputs with the provided drivers.
+- Some sweeps are computationally expensive, especially long-period and
+  thin-layer cases.

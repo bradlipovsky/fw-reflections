@@ -6,14 +6,21 @@
 set -e
 
 currentdir=$(pwd)
+specfem_root=$(cd "$currentdir/../.." && pwd)
+
+if [ ! -x "$specfem_root/bin/xmeshfem2D" ] || [ ! -x "$specfem_root/bin/xspecfem2D" ]; then
+  echo "Missing SPECFEM2D executables in $specfem_root/bin." >&2
+  echo "Clone this repo into SPECFEM2D_ROOT/WORK/groundingline and build SPECFEM2D first." >&2
+  exit 1
+fi
 
 mkdir -p OUTPUT_FILES bin
 rm -rf OUTPUT_FILES/*
 
 cd "$currentdir/bin"
 rm -f xmeshfem2D xspecfem2D
-ln -s ../../../bin/xmeshfem2D
-ln -s ../../../bin/xspecfem2D
+ln -s "$specfem_root/bin/xmeshfem2D"
+ln -s "$specfem_root/bin/xspecfem2D"
 cd "$currentdir"
 
 # Rebuild the receiver list from the editable parameter block in DATA/make_stations.py.

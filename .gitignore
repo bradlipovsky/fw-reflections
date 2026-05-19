@@ -1,0 +1,27 @@
+.DS_Store
+.vscode/
+__pycache__/
+*.pyc
+
+# Generated SPECFEM outputs
+OUTPUT_FILES/
+bin/
+
+# Generated DAS products
+das/products/
+
+# Generated sweep outputs
+sweep/results/
+sweep/results_*/
+sweep/results_supportedcavity_*/
+sweep/results_icethickness_*/
+sweep/results_glposition_*/
+sweep/results_seafloorshape_*/
+
+# Local experiment archives
+variant_results/
+variants/
+
+# Debug / mesh diagnostics
+DX_all_elements_with_negative_jacobian_in_red.dx
+DX_first_element_with_negative_jacobian.dx

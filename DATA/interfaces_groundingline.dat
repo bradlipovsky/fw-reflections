@@ -1,33 +1,47 @@
 #
-# Flat-interface geometry for the grounding-line starter example.
-# Coordinates use the internal mesher convention with z increasing upward.
+# Near-pinch-out seafloor geometry for the grounding-line starter example.
+# The cavity remains 100 m thick far from the grounding line, then the seafloor
+# ramps upward over the last two kilometers before x = 0 so the water thickness
+# is 30 m at the grounding line instead of pinching out exactly.
 #
 # number of interfaces
 #
-3
+4
 #
 # interface number 1 (bottom of the mesh)
 #
 2
 -12000.0 0.0
-  6000.0 0.0
+ 6000.0 0.0
 #
-# interface number 2 (bottom of the ice layer)
+# interface number 2 (top of the full-width solid underlayer / seafloor)
+#
+5
+-12000.0 1100.0
+-2000.0 1100.0
+-1000.0 1135.0
+0.0 1170.0
+6000.0 1170.0
+#
+# interface number 3 (bottom of the ice layer)
 #
 2
 -12000.0 1200.0
-  6000.0 1200.0
+ 6000.0 1200.0
 #
-# interface number 3 (free surface)
+# interface number 4 (free surface)
 #
 2
 -12000.0 1500.0
-  6000.0 1500.0
+ 6000.0 1500.0
 #
 # number of spectral elements per layer in the vertical direction
 #
-# layer 1: substrate thickness = 1200 m -> dz = 30 m
-40
+# layer 1: full-width solid underlayer thickness = 1100-1170 m
+55
 #
-# layer 2: ice thickness = 300 m -> dz = 30 m
-10
+# layer 2: cavity/grounded transition band thickness = 30-100 m
+5
+#
+# layer 3: ice thickness = 300 m
+15

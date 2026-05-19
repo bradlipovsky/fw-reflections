@@ -1,35 +1,40 @@
-# DAS Postprocessing
+# DAS postprocessing
 
-This directory contains lightweight Python utilities for turning the grounding-line example output into a synthetic distributed acoustic sensing product.
+This directory contains lightweight Python utilities for turning the
+grounding-line simulation output into synthetic DAS-style products.
 
-## What is here
+## Files
 
-- [`io_utils.py`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/das/io_utils.py): load SPECFEM `.semv` files or simple `spec2npy`-style `.npz/.npy` gathers
-- [`synthetic.py`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/das/synthetic.py): project particle velocity onto a fiber direction and form gauge-length DAS strain-rate records
-- [`make_synthetic_das.py`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/das/make_synthetic_das.py): command-line helper that writes a DAS `.npz` product
-- [`groundingline_das_workflow.ipynb`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/das/groundingline_das_workflow.ipynb): notebook version of the same workflow
+- [`io_utils.py`](io_utils.py): load SPECFEM `.semv` files or compact `.npz` gathers
+- [`synthetic.py`](synthetic.py): DAS synthesis and FK filtering helpers
+- [`reflection.py`](reflection.py): signed reflection-coefficient utilities
+- [`make_synthetic_das.py`](make_synthetic_das.py): command-line DAS product generator
+- [`groundingline_das_workflow.ipynb`](groundingline_das_workflow.ipynb): main DAS workflow notebook
+- [`groundingline_reflection_coefficient.ipynb`](groundingline_reflection_coefficient.ipynb): baseline reflection-coefficient notebook
 
-## Assumptions
+## Assumption used for the first-pass DAS observable
 
-For a straight horizontal fiber, the notebook uses the usual first-pass approximation
+For a straight horizontal fiber, the workflow uses the standard approximation
 
 `strain_rate(x,t) ~= [v_x(x + L/2, t) - v_x(x - L/2, t)] / L`
 
 where `L` is the gauge length.
 
-That is a starter approximation, not a full instrument model. It is useful for comparing incident and reflected surface-wave energy and for testing the effect of gauge length and channel spacing.
+This is a starter approximation for comparing incident and reflected
+surface-wave energy, not a full instrument model.
 
 ## Quick start
 
-From [`/Users/bradlipovsky/specfem2d-master/WORK/groundingline/das`](/Users/bradlipovsky/specfem2d-master/WORK/groundingline/das):
+From the project root, after a baseline SPECFEM2D run:
 
 ```bash
+cd das
 python3 make_synthetic_das.py \
   --input ../OUTPUT_FILES \
   --station-prefix S \
-  --gauge-length 50 \
-  --channel-spacing 25 \
+  --gauge-length 6.28 \
+  --channel-spacing 6.28 \
   --output products/surface_das.npz
 ```
 
-Then open the notebook and run it from top to bottom.
+Then open the notebooks and run them top to bottom.

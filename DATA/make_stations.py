@@ -4,9 +4,10 @@
 from pathlib import Path
 
 # Key editable receiver parameters
-X_START = -3500.0
-X_END = -200.0
-DX = 50.0
+# Keep the array centered on the grounding line with a 4 km total aperture.
+X_START = -2000.0
+X_END = 2000.0
+DX = 6.28
 Z_SURFACE_NEAR = 1499.0
 Z_SHALLOW = 1450.0
 NETWORK = "GL"
@@ -14,9 +15,15 @@ NETWORK = "GL"
 
 def build_line(prefix: str, z_value: float, start_index: int):
     entries = []
-    count = int(round((X_END - X_START) / DX)) + 1
-    for i in range(count):
-        x = X_START + i * DX
+    x_values = []
+    x = X_START
+    while x <= X_END + 1.0e-9:
+        x_values.append(min(x, X_END))
+        x += DX
+    if abs(x_values[-1] - X_END) > 1.0e-9:
+        x_values.append(X_END)
+
+    for i, x in enumerate(x_values):
         station = f"{prefix}{start_index + i:04d}"
         entries.append(
             f"{station:<8s} {NETWORK:<8s} {x:16.6f} {z_value:16.6f} 0.0 0.0"
